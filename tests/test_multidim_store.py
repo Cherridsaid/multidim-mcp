@@ -193,7 +193,7 @@ class TestFirstRunAndPersistence(StoreTestBase):
         self.assertTrue(p.is_dir())  # untouched, not replaced by a seeded file
 
     def test_occupied_backup_name_does_not_block_recovery(self):
-        # Round 59 changed this case: an OCCUPIED backup name (here a
+        # A later fix changed this case: an OCCUPIED backup name (here a
         # directory) used to abort the load, which also meant a second
         # corruption bricked the server. The backup now takes the next free
         # name -- what must never happen is writing THROUGH the occupied path.
@@ -307,7 +307,7 @@ class TestNeutrality(unittest.TestCase):
 
     def test_no_personal_path_in_serialized_store(self):
         blob = json.dumps(base_contexts.base_contexts(), ensure_ascii=False).lower()
-        for tok in ("c:/users", "c:\\users", "/home/", ".multidim", ".mempalace"):
+        for tok in ("c:/users", "c:\\users", "/home/", ".multidim"):
             self.assertNotIn(tok, blob)
 
 

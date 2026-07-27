@@ -135,15 +135,14 @@ def base_contexts() -> List[Dict]:
 # GENERIC leak indicators only -- absolute-path prefixes, home/config dirs and
 # obvious secret markers. Deliberately nobody's name or private project is
 # hardcoded here: the PUBLISHED package must not itself carry personal tokens
-# (that would be the very leak this guard exists to prevent). Downstream
-# maintainers can extend this tuple with their own private markers locally.
+# (that would be the very leak this guard exists to prevent). Personal markers
+# belong in MULTIDIM_MCP_EXTRA_FORBIDDEN, never in this published tuple.
 FORBIDDEN_TOKENS = (
     "c:/users",
     "c:\\users",
     "/home/",
     "/users/",
     ".multidim",
-    ".mempalace",
     ".ssh/",
     "-----begin",
     "@gmail.com",

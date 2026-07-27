@@ -296,7 +296,7 @@ def _lex(text: str) -> List[str]:
     """Tokens of ``text``, plus the non-ASCII SYMBOLS the pattern skipped.
 
     The pattern is a whitelist, so anything it does not recognise is dropped --
-    and a dropped symbol inverts a lesson: 'statut CHECK' and 'statut CROSS'
+    and a dropped symbol inverts a lesson: 'status CHECK' and 'status CROSS'
     became one key, and one trap silently replaced the other. Unicode general
     category S (Sm/Sc/Sk/So) is 'symbol', so those code points are kept
     wherever they appear, without enumerating them one by one -- the standard

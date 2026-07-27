@@ -285,7 +285,7 @@ class TestValidate(_IsolatedStoreCase):
         self.assertIn("PREMORTEM_COPIES_RISKS", codes)
 
     def test_oversized_risks_are_refused_before_the_pairwise_pass(self):
-        # Review finding (2026-07-27, extraction round 53): the pre-mortem pass
+        # the pre-mortem pass
         # compares every pre-mortem text to every risk field, and neither side
         # was bounded. A 60 KB frame of small items burned tens of seconds of
         # server time (measured: 1.6 s at 100 items, 27 s at 400) -- a stall any
@@ -375,7 +375,7 @@ class TestValidate(_IsolatedStoreCase):
         self.assertTrue(is_error, text)
 
     def test_stripped_contract_is_refused_as_tampered(self):
-        # CONTRACT HARDENED (2026-07-27, extraction round 9): a frame whose
+        # CONTRACT HARDENED: a frame whose
         # body was edited after issuance (required_sections stripped, original
         # frame_hash kept) is now REFUSED outright -- the received body must
         # match its own frame_hash before anything else. Silently validating

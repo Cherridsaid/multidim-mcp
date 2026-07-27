@@ -181,7 +181,7 @@ def merge_axes(existing_axes: List[Dict], new_axes: List[Dict]) -> Tuple[int, in
     update the duplicate ``by_name`` happens to index and leave its twin in the
     grid forever.
 
-    That collapse is LOSSLESS or it does not happen (round 42): a twin holding
+    That collapse is LOSSLESS or it does not happen: a twin holding
     a non-empty value where the survivor holds a DIFFERENT non-empty one is
     kept where it is. Dropping it would silently destroy something the user
     wrote, and a visible duplicate they can arbitrate is the lesser evil.
@@ -204,7 +204,7 @@ def merge_axes(existing_axes: List[Dict], new_axes: List[Dict]) -> Tuple[int, in
         if not (isinstance(n, str) and n.strip()):
             i += 1
             continue
-        # index STRIPPED (round 8): a historical ' A ' and a new 'A' are one
+        # index STRIPPED: a historical ' A ' and a new 'A' are one
         # identity; the survivor's stored name is normalised too
         n = n.strip()
         a["name"] = n
@@ -388,7 +388,7 @@ def call_tool(store: Dict, name: str, args: Dict) -> Tuple[str, bool]:
         if not isinstance(depth, str) or depth not in DEPTH_PARAMS:
             return ("invalid frame: 'depth' must be core, deep or full.", True)
         # bool is an int subclass: score=true would ride through every int
-        # check as 1 (round 10) -- refuse the type explicitly
+        # check as 1 -- refuse the type explicitly
         if (not isinstance(ctx_name, str) or not ctx_name
                 or not isinstance(score, int) or isinstance(score, bool)):
             return ("invalid frame: 'context' (name, score) absent or malformed "
@@ -413,7 +413,7 @@ def call_tool(store: Dict, name: str, args: Dict) -> Tuple[str, bool]:
             score = detected_score
         # the received frame must be SELF-consistent first: comparing only the
         # received HASH to the rebuilt hash lets a stripped or edited BODY that
-        # kept its original hash slip through as if untouched (round 9)
+        # kept its original hash slip through as if untouched
         if frames_mod.frame_hash_of(frame) != frame.get("frame_hash"):
             return ("tampered frame: the frame's content does not match its own "
                     "frame_hash (the frame was edited after issuance). Regenerate "
@@ -513,7 +513,7 @@ def call_tool(store: Dict, name: str, args: Dict) -> Tuple[str, bool]:
         # was dropped instead of reporting a false full success.
         generic_keywords_ignored = False
         if is_generic(cname) and new_keywords:
-            # only a VALID trap makes the call "mixed" (round 9): an invalid
+            # only a VALID trap makes the call "mixed": an invalid
             # one (e.g. {}) is refused later by upsert_traps, so counting it
             # here would report success on a call that learns nothing at all
             has_valid_trap = any(
@@ -555,13 +555,13 @@ def call_tool(store: Dict, name: str, args: Dict) -> Tuple[str, bool]:
                         existing["keywords"].append(k)
                 a_add, a_upd = merge_axes(existing["axes"], new_axes)
                 t_add, t_upd, t_err = frames_mod.upsert_traps(existing, raw_traps)
-                # round 10: the keywords-only decision can only fall AFTER
+                # the keywords-only decision can only fall AFTER
                 # upsert_traps, under the lock -- a trap valid in shape can
                 # still be refused (id/statement collision), and if every trap
                 # was REFUSED while the keywords were dropped, this call
                 # learned nothing and must not report success. Raising aborts
                 # the mutate() before its save, leaving the store untouched.
-                # round 11: refused means t_err -- an identical re-send is a
+                # refused means t_err -- an identical re-send is a
                 # legitimate idempotent NO-OP (0 added, 0 updated, 0 errors)
                 # and stays a success, so only error when every trap errored.
                 if (generic_keywords_ignored and not desc and not new_axes

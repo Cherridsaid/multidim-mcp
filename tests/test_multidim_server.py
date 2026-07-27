@@ -223,7 +223,7 @@ class TestAnalyze(unittest.TestCase):
     def test_grid_output_is_neutral(self):
         text = self._call({"subject": "x", "depth": "full"})["content"][0]["text"].lower()
         # the shipped grid must carry no local path / host-tool markers
-        for tok in ("c:/users", "/home/", ".multidim", ".mempalace", ".ssh/"):
+        for tok in ("c:/users", "/home/", ".multidim", ".ssh/"):
             self.assertNotIn(tok, text)
 
 

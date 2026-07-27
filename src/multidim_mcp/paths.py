@@ -72,9 +72,9 @@ def data_dir() -> Path:
         path = Path(os.path.expanduser(override.strip()))
         if not path.is_absolute():
             raise RuntimeError(
-                "refus: %s doit etre un chemin absolu (recu: %r) -- un chemin "
-                "relatif suit le repertoire courant du processus, donc deux "
-                "lancements du serveur liraient deux stores differents"
+                "%s must be an absolute path (got %r): a relative one follows "
+                "the process's current directory, so two launches of the "
+                "server would read two different stores"
                 % (_ENV_OVERRIDE, override)
             )
         return path
@@ -124,7 +124,8 @@ def assert_not_personal(path) -> None:
         inside_personal = False
     if inside_personal:
         raise RuntimeError(
-            "refus: le store OSS ne doit jamais pointer dans ~/.multidim (store personnel)"
+            "refusing: this store must never resolve inside ~/.multidim, "
+            "which belongs to a separate personal installation"
         )
 
 

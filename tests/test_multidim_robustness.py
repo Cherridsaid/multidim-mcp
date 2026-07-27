@@ -69,7 +69,7 @@ class TestD1NamelessContext(RobustnessTestBase):
         self.assertTrue(all(c.get("name") for c in st["contexts"]))
         # analysis works again after the reset (no KeyError)
         text, is_error = server.call_tool(st, "multidim_analyze",
-                                          {"subject": "sujet zorglubxyz", "format": "v2"})
+                                          {"subject": "subject zorglubxyz", "format": "v2"})
         self.assertFalse(is_error, text)
 
 
@@ -143,7 +143,7 @@ class TestD3AxisDeduplication(RobustnessTestBase):
         self.assertEqual(ctx["axes"][0]["sublenses"], ["s3"])
 
     def test_legacy_duplicate_axes_are_collapsed_on_learn(self):
-        # Review finding (2026-07-25, round 3): a store written by the OLD
+        # a store written by the OLD
         # buggy extend may already hold two axes named 'A'. by_name indexed
         # only one of them, so a re-learn updated one twin and left the other
         # forever. merge_axes now collapses legacy duplicates at the write
@@ -166,7 +166,7 @@ class TestD3AxisDeduplication(RobustnessTestBase):
         self.assertEqual(ctx["axes"][0]["sublenses"], ["s1"])
 
     def test_whitespace_only_axis_name_is_refused(self):
-        # Review finding (2026-07-25, round 7): '   ' passed the non-empty
+        # '   ' passed the non-empty
         # check unstripped, dodged the dedup (blank names are not identities)
         # and accumulated a duplicate per learn. Refused at the door now.
         text, is_error = server.call_tool(store.load(), "multidim_learn",
@@ -185,7 +185,7 @@ class TestD3AxisDeduplication(RobustnessTestBase):
         self.assertEqual(ctx["axes"][0]["question"], "q2")
 
     def test_legacy_unstripped_axis_name_merges_with_stripped(self):
-        # Review finding (2026-07-25, round 8): a historical axis stored as
+        # a historical axis stored as
         # ' A ' plus a re-learn of 'A' produced two axes (dedup indexed the
         # unstripped name). One identity now: survivor renamed 'A', updated.
         self._write_store(lambda st: st["contexts"].append(
@@ -201,7 +201,7 @@ class TestD3AxisDeduplication(RobustnessTestBase):
         self.assertEqual(ctx["axes"][0]["sublenses"], ["s"])
 
     def test_anonymous_axes_are_preserved_by_dedup(self):
-        # Review finding (2026-07-25, round 6): two axes with an empty name in
+        # two axes with an empty name in
         # a hand-edited store were both indexed under the same key by the
         # legacy dedup, destroying all but the first. Anonymous axes are not
         # identities: they must survive any learn untouched.
@@ -232,7 +232,7 @@ class TestD3AxisDeduplication(RobustnessTestBase):
         self.assertEqual([a["name"] for a in ctx["axes"]], ["A", "B"])
 
     def test_creation_message_counts_stored_axes_not_sent(self):
-        # Review finding (2026-07-25, round 4): two same-name axes in ONE
+        # two same-name axes in ONE
         # create call collapse to one; the message must report the stored
         # count, not "created with 2 axes".
         text, is_error = server.call_tool(store.load(), "multidim_learn",
@@ -259,7 +259,7 @@ class TestD4GenericKeywords(RobustnessTestBase):
         self.assertNotIn("motrarissime", store.find_context(fresh, "generic")["keywords"])
 
     def test_keywords_plus_invalid_trap_on_generic_is_still_an_error(self):
-        # Review finding (2026-07-25, round 9): keywords + traps=[{}] slipped
+        # keywords + traps=[{}] slipped
         # past the keywords-only gate as "mixed", the invalid trap was then
         # refused by upsert_traps, and the call reported success while
         # learning NOTHING. Only a valid trap makes the call mixed.
@@ -272,7 +272,7 @@ class TestD4GenericKeywords(RobustnessTestBase):
         self.assertNotIn("mort", store.find_context(fresh, "generic")["keywords"])
 
     def test_keywords_plus_collision_refused_trap_on_generic_is_an_error(self):
-        # Review finding (2026-07-25, round 10): a trap VALID in shape can
+        # a trap VALID in shape can
         # still be refused by upsert_traps (id/statement collision). If the
         # keywords were dropped and every trap failed, the call learned
         # nothing: the decision must fall AFTER upsert, under the lock.
@@ -295,7 +295,7 @@ class TestD4GenericKeywords(RobustnessTestBase):
         self.assertEqual(stmts, ["lesson one", "lesson two"])
 
     def test_keyword_plus_identical_trap_resend_on_generic_is_a_noop_success(self):
-        # Review finding (2026-07-25, round 11): re-sending an IDENTICAL trap
+        # re-sending an IDENTICAL trap
         # is a legitimate idempotent no-op (0 added, 0 updated, 0 refused),
         # not a failure: with a dropped keyword it must stay a success with
         # the ignored-keywords note, not flip to isError.
@@ -331,7 +331,7 @@ class TestD4GenericKeywords(RobustnessTestBase):
 
 class TestFastPathTrapMigration(RobustnessTestBase):
     def test_trap_without_active_is_migrated_despite_fast_path(self):
-        # Review finding (2026-07-25, round 5): a FULLY migrated store plus a
+        # a FULLY migrated store plus a
         # valid trap lacking 'active' slipped through the lock-free fast path
         # ("traps" key present), the active=True migration never ran, and
         # select_traps -- which requires active is True -- silently never
@@ -347,7 +347,7 @@ class TestFastPathTrapMigration(RobustnessTestBase):
         loaded = store.find_context(st, "tctx")["traps"][0]
         self.assertIs(loaded.get("active"), True)
         selected = frames.select_traps(store.find_context(st, "tctx"),
-                                       "sujet zorglubxyz")
+                                       "subject zorglubxyz")
         self.assertEqual([t["trap_id"] for t in selected], ["t1"])
 
 
@@ -367,7 +367,7 @@ class TestD5PrivateKeysNeverPersisted(RobustnessTestBase):
         self.assertEqual(leaked, [])
 
     def test_markers_persisted_by_prefix_version_are_scrubbed_on_load(self):
-        # Review finding (2026-07-25, round 8): markers written to disk by a
+        # markers written to disk by a
         # PRE-FIX save() passed the fast path forever. load() must fall to the
         # locked path, scrub them from memory AND re-write the clean copy.
         path = self._write_store(lambda st: st.update(
@@ -380,7 +380,7 @@ class TestD5PrivateKeysNeverPersisted(RobustnessTestBase):
         self.assertNotIn("_backup", on_disk)
 
     def test_unknown_underscore_key_is_not_silently_dropped(self):
-        # Review finding (2026-07-25, round 2): only the KNOWN internal
+        # only the KNOWN internal
         # markers are filtered; a caller extension key must survive save().
         st = store.load()
         st["_vendor_extension"] = {"kept": True}
@@ -406,7 +406,7 @@ class TestD5PrivateKeysNeverPersisted(RobustnessTestBase):
 
 class TestOperatorAwareNormalization(RobustnessTestBase):
     def test_opposite_comparison_traps_stay_distinct(self):
-        # Review finding (2026-07-27, extraction round 2): dropping operator
+        # dropping operator
         # characters from the dedup key made 'retry_count < 3' and
         # 'retry_count > 3' one key -- the second lesson silently replaced
         # the first. Both must coexist.
@@ -429,7 +429,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
         self.assertTrue(validate.normalized_equal("x < 3", "x  <  3"))
 
     def test_numeric_sign_is_preserved(self):
-        # Review finding (2026-07-27, extraction round 3): the minus sign was
+        # the minus sign was
         # dropped, so 'x < 3' and 'x < -3' collapsed to one key. A sign glued
         # to a number survives; a word-internal hyphen stays a separator.
         from multidim_mcp import frames, validate
@@ -440,7 +440,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
                          frames.normalize_statement("fail closed design"))
 
     def test_sign_glued_to_a_word_is_preserved(self):
-        # Review finding (2026-07-27, extraction round 13): with no space,
+        # with no space,
         # 'limit+3' and 'limit-3' both folded to 'limit 3' -- the sign was
         # only kept when it started a token. Opposite lessons again.
         from multidim_mcp import frames, validate
@@ -452,7 +452,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
                          frames.normalize_statement("fail closed"))
 
     def test_opposite_formulas_stay_distinct(self):
-        # Review finding (2026-07-27, extraction round 43): a spaced '+' and a
+        # a spaced '+' and a
         # spaced '-' both fell through as separators, so 'price = cost + tax'
         # and 'price = cost - tax' shared one key. The validator called the
         # second an ALTERNATIVE_DUPLICATES_PRIMARY, and upsert_traps silently
@@ -485,7 +485,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
         self.assertEqual(stmts, ["price = cost + tax", "price = cost - tax"])
 
     def test_spacing_around_an_operator_does_not_change_the_key(self):
-        # Review finding (2026-07-27, extraction round 46): a glued '+' was
+        # a glued '+' was
         # claimed by the technical-identifier rule, so 'cost+tax' keyed as
         # 'cost+ tax' and never matched 'cost + tax' -- a plain duplicate came
         # back as a WARNING instead of a REJECT. '+' needs to be DOUBLED to be
@@ -505,7 +505,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
         self.assertFalse(validate.normalized_equal("cost-tax", "cost - tax"))
 
     def test_sign_after_an_operand_reads_as_an_addition(self):
-        # Review finding (2026-07-27, extraction round 47): '+3' was always
+        # '+3' was always
         # lexed as a signed number, so 'x=x+3' keyed as 'x = x +3' and never
         # matched 'x = x + 3'. After an operand a sign is an operator.
         from multidim_mcp import validate
@@ -519,7 +519,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
         self.assertFalse(validate.normalized_equal("limit < -.5", "limit < .5"))
 
     def test_unary_minus_on_a_word_is_not_dropped(self):
-        # Review finding (2026-07-27, extraction round 48): a '-' glued to a
+        # a '-' glued to a
         # WORD matched no rule, so it was discarded as a separator and
         # 'result = -input' keyed exactly like 'result = input'. The negation
         # vanished, and learning one lesson overwrote its opposite.
@@ -547,7 +547,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
         self.assertEqual(stmts, ["result = -input", "result = input"])
 
     def test_opposite_logical_rules_stay_distinct(self):
-        # Review finding (2026-07-27, extraction round 44): logical operators
+        # logical operators
         # fell through as separators, so 'admin && owner' and 'admin || owner'
         # -- one demands both, the other either -- shared a key and the
         # validator called the alternative a duplicate of the primary.
@@ -565,7 +565,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
         self.assertTrue(validate.normalized_equal("disk is full!", "disk is full"))
 
     def test_every_negated_relation_differs_from_its_positive(self):
-        # Review finding (2026-07-27, extraction round 58): NFKD turns EVERY
+        # NFKD turns EVERY
         # negated relation into its positive form plus a combining stroke, and
         # fold() drops combining marks, so 'limit NOT-LESS-THAN 3' keyed as
         # 'limit < 3' -- the opposite lesson, silently overwriting it. 45 code
@@ -599,7 +599,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
                                                   "x " + chr(0x2264) + " 3"))
 
     def test_unicode_logic_symbols_are_kept(self):
-        # Review finding (2026-07-27, extraction round 52): logic symbols
+        # logic symbols
         # written in Unicode were dropped as separators, so 'user AND admins'
         # and 'user OR admins' keyed alike and one trap replaced the other.
         # The NEGATED relations need folding BEFORE fold(), since NFKD turns
@@ -636,9 +636,9 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
                          sorted([both, either]))
 
     def test_unicode_symbols_of_category_s_are_kept(self):
-        # Review finding (2026-07-27, extraction round 55): the pattern is a
-        # whitelist, so any symbol it did not list was dropped -- 'statut OK'
-        # and 'statut KO' written with check and cross marks keyed alike, and
+        # the pattern is a
+        # whitelist, so any symbol it did not list was dropped -- 'status OK'
+        # and 'status KO' written with check and cross marks keyed alike, and
         # one trap replaced the other. Whole category S is kept now, rather
         # than an enumeration that keeps leaking.
         from multidim_mcp import validate
@@ -646,21 +646,21 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
                         (0x2611, 0x2612),    # BALLOT BOX WITH CHECK / WITH X
                         (0x2191, 0x2193)):   # UPWARDS / DOWNWARDS ARROW
             self.assertFalse(
-                validate.normalized_equal("statut " + chr(yes),
-                                          "statut " + chr(no)),
+                validate.normalized_equal("status " + chr(yes),
+                                          "status " + chr(no)),
                 "%s vs %s" % (hex(yes), hex(no)))
-            self.assertFalse(validate.normalized_equal("statut " + chr(yes),
-                                                       "statut"))
+            self.assertFalse(validate.normalized_equal("status " + chr(yes),
+                                                       "status"))
         # Unicode PUNCTUATION stays ignored: typographic quotes and an em dash
         # are ornaments, not meaning, and folding them away is what lets two
         # spellings of one lesson still match.
         self.assertTrue(validate.normalized_equal(
-            "le " + chr(0x00AB) + " statut " + chr(0x00BB) + " final",
-            "le statut final"))
+            "the " + chr(0x00AB) + " final status " + chr(0x00BB),
+            "the final status"))
 
     def test_symbol_traps_both_survive(self):
-        base = {"mandatory_question": "checked?", "triggers": ["statut"]}
-        ok, ko = "statut " + chr(0x2713), "statut " + chr(0x2717)
+        base = {"mandatory_question": "checked?", "triggers": ["status"]}
+        ok, ko = "status " + chr(0x2713), "status " + chr(0x2717)
         server.call_tool(store.load(), "multidim_learn",
                          {"context": "c", "traps": [dict(base, statement=ok)]})
         text, is_error = server.call_tool(
@@ -672,7 +672,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
                          sorted([ok, ko]))
 
     def test_a_run_of_minuses_is_not_one_minus(self):
-        # Review finding (2026-07-27, extraction round 56): in 'x--y' the first
+        # in 'x--y' the first
         # minus had a letter before it, so no rule claimed it and it was
         # dropped -- the key collapsed onto 'x - y', a different operation.
         # A RUN of minuses is never a compound word, so it is kept whole.
@@ -688,7 +688,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
         self.assertEqual(frames.normalize_statement("limit < -3"), "limit < -3")
 
     def test_negation_before_a_group_or_a_relation_is_kept(self):
-        # Review finding (2026-07-27, extraction round 62): the negation rule
+        # the negation rule
         # required a LETTER after the '!', so it was dropped in
         # '!(admin || owner)' -- which then keyed like the un-negated rule and
         # merged two opposite lessons. What follows a negation may be a group
@@ -705,7 +705,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
         self.assertTrue(validate.normalized_equal("hello! world", "hello world"))
 
     def test_trailing_punctuation_is_not_an_operator(self):
-        # Review finding (2026-07-27, extraction round 35): a bare '!' was
+        # a bare '!' was
         # tokenized as an operator, so 'disk is full' and 'disk is full!'
         # were NOT normalized-equal -- a manifest duplicate was downgraded
         # from REJECT to WARNING. Only real comparison operators count.
@@ -722,7 +722,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
         from multidim_mcp import frames, validate
         st = store.load()
         frame = frames.build_frame(st, store.find_context(st, "generic"),
-                                   "sujet", 0, "core")
+                                   "subject", 0, "core")
         analysis = {
             "hypotheses": [{"hypothesis_id": "H1", "statement": "disk is full"}],
             "alternatives": [{"alternative_id": "A1", "statement": "disk is full!"}],
@@ -734,7 +734,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
         self.assertIn("ALTERNATIVE_DUPLICATES_PRIMARY", alts["error_codes"])
 
     def test_technical_identifiers_keep_their_punctuation(self):
-        # Review finding (2026-07-27, extraction round 29): 'C++' and 'C#'
+        # 'C++' and 'C#'
         # both reduced to 'c', so a legitimate alternative was REJECTED as a
         # duplicate of the primary hypothesis. The punctuation IS the name.
         from multidim_mcp import frames, validate
@@ -757,7 +757,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
         self.assertEqual(len(ctx["traps"]), 2)
 
     def test_unicode_math_signs_are_normalized(self):
-        # Review finding (2026-07-27, extraction round 20): U+2212 MINUS SIGN
+        # U+2212 MINUS SIGN
         # is not '-', so 'x < MINUS 3' dropped its sign and collapsed onto
         # 'x < 3' -- the opposite lesson. Unicode look-alikes now fold to
         # their ASCII meaning. Source stays pure ASCII (code points).
@@ -787,7 +787,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
         self.assertEqual(len(ctx["traps"]), 2)
 
     def test_leading_dot_decimals_stay_distinct(self):
-        # Review finding (2026-07-27, extraction round 17): '.5' lost its dot
+        # '.5' lost its dot
         # and '-.5' lost its sign too, so 'limit < .5' and 'limit < -.5' both
         # folded to 'limit < 5'. The tokenizer now reads numbers, not chars.
         from multidim_mcp import frames, validate
@@ -834,7 +834,7 @@ class TestOperatorAwareNormalization(RobustnessTestBase):
 
 class TestPunctuatedKeywords(RobustnessTestBase):
     def test_punctuated_keywords_match(self):
-        # Review finding (2026-07-27, extraction round 25): 'c++', 'c#' and
+        # 'c++', 'c#' and
         # 'node.js' took the whole-token branch, which compares against
         # ALPHANUMERIC runs -- so they could never match. Both detection and
         # trap triggers now share one rule (bounded substring).
@@ -871,7 +871,7 @@ class TestPunctuatedKeywords(RobustnessTestBase):
 
 class TestContextLookupNormalisation(RobustnessTestBase):
     def test_stored_name_with_trailing_space_is_found(self):
-        # Review finding (2026-07-27, extraction round 23): a hand-edited
+        # a hand-edited
         # 'legacy_ctx ' passed validation but find_context('legacy_ctx')
         # missed it -- learn then appended a DUPLICATE context.
         self._write_store(lambda st: st["contexts"].append(
@@ -887,7 +887,7 @@ class TestContextLookupNormalisation(RobustnessTestBase):
         self.assertEqual(names.count("legacy_ctx"), 1)
 
     def test_duplicate_normalised_names_are_corruption(self):
-        # Review finding (2026-07-27, extraction round 24): two contexts
+        # two contexts
         # sharing a normalised name made find_context (first match) and
         # detect_context (best score) disagree -- validate then rejected an
         # untouched frame. Duplicate identities = backup + reset.
@@ -903,7 +903,7 @@ class TestContextLookupNormalisation(RobustnessTestBase):
         self.assertIn("generic", store.list_context_names(reloaded))
 
     def test_case_variant_generic_does_not_trigger_a_reset(self):
-        # Review finding (2026-07-27, extraction round 27): a store whose
+        # a store whose
         # seed was renamed ' Generic ' was FOUND by find_context but failed
         # the exact 'generic' presence check -- the reset destroyed the
         # user's own contexts. Both sides normalise now.
@@ -932,7 +932,7 @@ class TestContextLookupNormalisation(RobustnessTestBase):
 
 class TestFalsyParameterDefaults(RobustnessTestBase):
     def test_non_string_depth_is_refused_not_defaulted(self):
-        # Review finding (2026-07-27, extraction round 36): `args.get("depth")
+        # `args.get("depth")
         # or "deep"` swallowed every falsy value, so depth=false silently
         # produced a DEEP grid instead of an error. Only a missing key
         # defaults.
@@ -940,18 +940,18 @@ class TestFalsyParameterDefaults(RobustnessTestBase):
             with self.subTest(depth=bad):
                 text, is_error = server.call_tool(
                     store.load(), "multidim_analyze",
-                    {"subject": "sujet", "depth": bad})
+                    {"subject": "subject", "depth": bad})
                 self.assertTrue(is_error, "depth=%r must be refused" % (bad,))
                 self.assertIn("depth", text)
 
     def test_missing_depth_still_defaults_to_deep(self):
         text, is_error = server.call_tool(store.load(), "multidim_analyze",
-                                          {"subject": "sujet", "format": "v2"})
+                                          {"subject": "subject", "format": "v2"})
         self.assertFalse(is_error, text)
         self.assertEqual(json.loads(text)["depth"], "deep")
 
     def test_non_string_context_is_refused_not_auto_detected(self):
-        # Review finding (2026-07-27, extraction round 39): context=false /
+        # context=false /
         # 0 / [] / {} fell through to auto-detection, so a schema violation
         # quietly produced a grid for a context the caller never chose.
         for bad in (False, 0, [], {}, "   "):
@@ -979,7 +979,7 @@ class TestFalsyParameterDefaults(RobustnessTestBase):
 
 class TestStdoutOwnership(RobustnessTestBase):
     def test_serve_does_not_detach_the_host_stdout(self):
-        # Review finding (2026-07-27, extraction round 34): serve() wrapped
+        # serve() wrapped
         # sys.stdout.buffer in a NEW TextIOWrapper, which took ownership and
         # left sys.stdout detached -- any later print() in the host process
         # raised ValueError. Proven in a child process: after serve() returns,
@@ -1005,7 +1005,7 @@ class TestStdoutOwnership(RobustnessTestBase):
 
 class TestSurrogateInLearnedText(RobustnessTestBase):
     def test_lone_surrogate_in_a_description_is_persisted(self):
-        # Review finding (2026-07-27, extraction round 33): a learned
+        # a learned
         # description carrying a lone surrogate is valid JSON input but not
         # encodable in UTF-8 -- the store write raised UnicodeEncodeError and
         # the tool answered an internal error. The store is ASCII-escaped now.
@@ -1022,7 +1022,7 @@ class TestSurrogateInLearnedText(RobustnessTestBase):
 
 class TestServerVersion(RobustnessTestBase):
     def test_announced_version_matches_the_packaging_metadata(self):
-        # Review finding (2026-07-27, extraction round 32): initialize
+        # initialize
         # announced a hardcoded 1.1.0 while the package shipped 0.1.0 --
         # a client trusting serverInfo was simply misinformed.
         import re as _re
@@ -1043,7 +1043,7 @@ class TestServerVersion(RobustnessTestBase):
 
 class TestRequestIdShape(RobustnessTestBase):
     def test_structured_id_is_refused(self):
-        # Review finding (2026-07-27, extraction round 16): JSON-RPC 2.0
+        # JSON-RPC 2.0
         # allows only String / Number / Null as an id. An object or array id
         # was accepted and echoed back, leaving a strict client unable to
         # correlate the response.
@@ -1068,7 +1068,7 @@ class TestRequestIdShape(RobustnessTestBase):
 
 class TestBackupNeverFollowsAnExistingPath(RobustnessTestBase):
     def test_existing_backup_path_is_never_written_through(self):
-        # Review finding (2026-07-27, extraction round 37): the corrupt-store
+        # the corrupt-store
         # backup wrote to store.json.bak with plain write_bytes -- if that
         # path already existed (a symlink to a personal store, say), the
         # evidence dump overwrote the target. O_EXCL + the personal guard
@@ -1085,8 +1085,8 @@ class TestBackupNeverFollowsAnExistingPath(RobustnessTestBase):
             # existing file, which O_EXCL must refuse just the same
             bak.write_text("PRECIOUS", encoding="utf-8")
         path.write_text("{ corrupt", encoding="utf-8")
-        # Round 59 CHANGED the outcome, not the guarantee. Failing closed was
-        # what round 37 could offer; it also meant a second corruption bricked
+        # A later fix changed the outcome, not the guarantee. Failing closed was
+        # what could offer; it also meant a second corruption bricked
         # the server. The backup now takes the next free name, so the load
         # RECOVERS -- while O_EXCL still forbids writing through the existing
         # path, which is the security property being asserted here.
@@ -1103,7 +1103,7 @@ class TestBackupNeverFollowsAnExistingPath(RobustnessTestBase):
 
 class TestLockPathGuard(RobustnessTestBase):
     def test_lock_path_is_guarded_like_every_other_write(self):
-        # Review finding (2026-07-27, extraction round 40): the lock file was
+        # the lock file was
         # opened without the personal-store guard, so a symlinked
         # store.json.lock had its target created OUTSIDE the tripwire.
         personal = store.paths.Path(
@@ -1121,7 +1121,7 @@ class TestLockPathGuard(RobustnessTestBase):
 
 class TestStoreJsonConstants(RobustnessTestBase):
     def test_nan_in_stored_trap_is_corruption_not_a_valid_store(self):
-        # Review finding (2026-07-27, extraction round 14): a store holding
+        # a store holding
         # severity: NaN loaded fine, the trap passed _valid_trap, and the
         # frame carried NaN onto the wire where no strict parser can read it.
         # Invalid JSON constants are corruption: backup + reset.
@@ -1139,7 +1139,7 @@ class TestStoreJsonConstants(RobustnessTestBase):
         self.assertIn("_reset_reason", reloaded)
 
     def test_overflowing_literal_in_store_is_corruption(self):
-        # Review finding (2026-07-27, extraction round 18): 1e999 is valid
+        # 1e999 is valid
         # JSON syntax, so parse_constant never saw it; the store loaded and
         # a frame carried Infinity onto the wire. Same treatment as NaN.
         path = store.paths.store_path()
@@ -1158,7 +1158,7 @@ class TestStoreJsonConstants(RobustnessTestBase):
         self.assertIsNone(store.find_context(reloaded, "tctx"))
 
     def test_deeply_nested_store_is_corruption_not_a_crash(self):
-        # Review finding (2026-07-27, extraction round 22): a store nested
+        # a store nested
         # thousands of levels deep raised RecursionError inside json.loads --
         # uncaught on BOTH read paths, so load() crashed instead of backing
         # the file up. Same treatment as any other unreadable store.
@@ -1181,7 +1181,7 @@ class TestStoreJsonConstants(RobustnessTestBase):
 
 class TestJsonConstantsRefused(RobustnessTestBase):
     def test_nan_id_is_a_parse_error_and_serving_continues(self):
-        # Review finding (2026-07-27, extraction round 12): Python's decoder
+        # Python's decoder
         # accepts NaN/Infinity (not valid JSON); the value was echoed back in
         # 'id' and no strict client could read the response.
         import io as _io
@@ -1201,7 +1201,7 @@ class TestJsonConstantsRefused(RobustnessTestBase):
             json.loads(l, parse_constant=server._reject_json_constant)
 
     def test_overflowing_float_literal_is_refused_and_loop_survives(self):
-        # Review finding (2026-07-27, extraction round 15): 1e999 is valid
+        # 1e999 is valid
         # JSON SYNTAX, so parse_constant never saw it; Python decoded it to
         # inf, which then hit allow_nan=False on the way out and killed the
         # loop with an uncaught ValueError -- the next ping got no answer.
@@ -1217,7 +1217,7 @@ class TestJsonConstantsRefused(RobustnessTestBase):
         self.assertEqual(json.loads(lines[1])["id"], 2)
 
     def test_deeply_nested_payload_does_not_kill_the_loop(self):
-        # Review finding (2026-07-27, extraction round 19): thousands of
+        # thousands of
         # nested arrays raised RecursionError inside json.loads, which was
         # not caught -- the whole server died and the next ping went
         # unanswered. A malformed request must never be a server fault.
@@ -1249,7 +1249,7 @@ class TestJsonConstantsRefused(RobustnessTestBase):
 
 class TestSurrogateIdOnWire(RobustnessTestBase):
     def test_lone_surrogate_id_does_not_kill_the_server(self):
-        # Review finding (2026-07-27, extraction round 11): JSON accepts a
+        # JSON accepts a
         # lone surrogate in "id"; echoing it back through a strict UTF-8
         # writer raised UnicodeEncodeError and killed the loop. The wire now
         # uses ensure_ascii=True, so the surrogate round-trips as a JSON
@@ -1272,7 +1272,7 @@ class TestSurrogateIdOnWire(RobustnessTestBase):
 
 class TestBooleanScoreForgery(RobustnessTestBase):
     def test_score_true_is_refused_even_with_recomputed_hash(self):
-        # Review finding (2026-07-27, extraction round 10): bool is an int
+        # bool is an int
         # subclass, so score=true rode through every isinstance(int) check as
         # 1; with an adapted explanation and a recomputed hash the forged
         # frame validated. The type is now refused explicitly.
@@ -1294,12 +1294,12 @@ class TestBooleanScoreForgery(RobustnessTestBase):
 
 class TestFrameSelfConsistency(RobustnessTestBase):
     def test_stripped_frame_with_original_hash_is_refused(self):
-        # Review finding (2026-07-27, extraction round 9): deleting
+        # deleting
         # frame['axes'] while keeping the original frame_hash passed --
         # only the received HASH was compared to the rebuilt hash, never
         # the received BODY to its own hash.
         text, is_error = server.call_tool(store.load(), "multidim_analyze",
-                                          {"subject": "sujet neutre", "format": "v2"})
+                                          {"subject": "neutral subject", "format": "v2"})
         self.assertFalse(is_error, text)
         frame = json.loads(text)
         del frame["axes"]
@@ -1309,11 +1309,11 @@ class TestFrameSelfConsistency(RobustnessTestBase):
         self.assertIn("tampered", text)
 
     def test_missing_or_edited_frame_id_is_refused(self):
-        # Review finding (2026-07-27, extraction round 26): frame_id is
+        # frame_id is
         # excluded from the hash (to keep it self-verifiable), so deleting or
         # editing it slipped past the content check.
         text, _ = server.call_tool(store.load(), "multidim_analyze",
-                                   {"subject": "sujet neutre", "format": "v2"})
+                                   {"subject": "neutral subject", "format": "v2"})
         base = json.loads(text)
         for mutate in (lambda f: f.pop("frame_id"),
                        lambda f: f.__setitem__("frame_id", "frame_forged")):
@@ -1329,7 +1329,7 @@ class TestFrameSelfConsistency(RobustnessTestBase):
 
     def test_untouched_frame_still_validates(self):
         text, _ = server.call_tool(store.load(), "multidim_analyze",
-                                   {"subject": "sujet neutre", "format": "v2"})
+                                   {"subject": "neutral subject", "format": "v2"})
         frame = json.loads(text)
         text, is_error = server.call_tool(store.load(), "multidim_validate",
                                           {"frame": frame, "analysis": {}})
@@ -1339,7 +1339,7 @@ class TestFrameSelfConsistency(RobustnessTestBase):
 
 class TestTrapActiveStrictness(RobustnessTestBase):
     def test_non_boolean_active_is_refused_not_coerced(self):
-        # Review finding (2026-07-27, extraction round 8): active: "false"
+        # active: "false"
         # (a string) was silently coerced to True -- the lesson the caller
         # explicitly tried to disable stayed active. Refused loudly now.
         trap = {"statement": "lesson", "mandatory_question": "q?",
@@ -1353,7 +1353,7 @@ class TestTrapActiveStrictness(RobustnessTestBase):
         self.assertEqual(ctx["traps"], [])
 
     def test_partial_resend_keeps_stored_optional_fields(self):
-        # Review finding (2026-07-27, extraction round 30): re-sending a trap
+        # re-sending a trap
         # WITHOUT its optional fields reset severity to 'medium' and, worse,
         # re-activated a lesson the caller had explicitly disabled.
         full = {"trap_id": "t1", "statement": "lesson", "mandatory_question": "q?",
@@ -1370,7 +1370,7 @@ class TestTrapActiveStrictness(RobustnessTestBase):
         self.assertIs(trap["active"], False)
 
     def test_identical_partial_resend_is_a_true_noop(self):
-        # Review finding (2026-07-27, extraction round 31): with optional
+        # with optional
         # fields now omitted, a strict dict comparison saw a difference on
         # every partial re-send and reported a phantom update.
         from multidim_mcp import frames
@@ -1386,7 +1386,7 @@ class TestTrapActiveStrictness(RobustnessTestBase):
         from multidim_mcp import frames
         st = store.load()
         ctx = store.find_context(st, "generic")
-        frame = frames.build_frame(st, ctx, "sujet " + "\ud800" + " casse", 0, "core")
+        frame = frames.build_frame(st, ctx, "subject " + "\ud800" + " casse", 0, "core")
         self.assertEqual(len(frame["frame_hash"]), 64)
         self.assertEqual(frames.frame_hash_of(frame), frame["frame_hash"])
 
@@ -1403,7 +1403,7 @@ class TestTrapActiveStrictness(RobustnessTestBase):
         self.assertIs(trap["active"], True)
 
     def test_out_of_enum_severity_is_refused_not_downgraded(self):
-        # Review finding (2026-07-27, extraction round 38): 'critical' was
+        # 'critical' was
         # silently rewritten to 'medium' -- a lesson the caller marked as
         # serious was DOWNGRADED while the call reported success.
         trap = {"statement": "lesson", "mandatory_question": "q?",
@@ -1440,7 +1440,7 @@ class TestTrapActiveStrictness(RobustnessTestBase):
 
 class TestStrictStdinDecoding(RobustnessTestBase):
     def test_invalid_utf8_line_answers_parse_error_and_serving_continues(self):
-        # Review finding (2026-07-27, extraction round 7): errors="replace"
+        # errors="replace"
         # silently ALTERED a request -- an invalid byte inside a valid JSON
         # string became U+FFFD, the line parsed, and the server answered
         # -32601 for a method the client never sent. Strict per-line decoding:
@@ -1463,7 +1463,7 @@ class TestStrictStdinDecoding(RobustnessTestBase):
 
 class TestWhitespaceKeyword(RobustnessTestBase):
     def test_whitespace_keyword_is_refused_at_learn(self):
-        # Review finding (2026-07-27, extraction round 5): keywords=[' ']
+        # keywords=[' ']
         # passed learn, then the multi-word substring branch matched EVERY
         # multi-word subject -- the context hijacked detection with score 1.
         text, is_error = server.call_tool(store.load(), "multidim_learn",
@@ -1482,7 +1482,7 @@ class TestWhitespaceKeyword(RobustnessTestBase):
         self.assertEqual(score, 0)
 
     def test_duplicate_keywords_are_stored_once(self):
-        # Review finding (2026-07-27, extraction round 6): ['cafe','cafe'] at
+        # ['cafe','cafe'] at
         # creation stored both, and detection counted 2 hits -- the duplicate
         # artificially beat a legitimate single-keyword context.
         cafe_accented = "caf" + chr(0xE9)  # ASCII-pure source (review pipe)
@@ -1547,10 +1547,10 @@ class TestAlternativePairwiseDuplication(RobustnessTestBase):
         from multidim_mcp import frames
         st = store.load()
         ctx = store.find_context(st, "generic")
-        return frames.build_frame(st, ctx, "sujet neutre", 0, depth)
+        return frames.build_frame(st, ctx, "neutral subject", 0, depth)
 
     def test_duplicate_alternatives_rejected_deep_and_full(self):
-        # Review finding (2026-07-27, extraction round 4): A2 copying A1 under
+        # A2 copying A1 under
         # a fresh identifier passed (only the vs-primary pair was checked) and
         # even satisfied min_alternatives. Both depths must reject.
         from multidim_mcp import validate
@@ -1565,7 +1565,7 @@ class TestAlternativePairwiseDuplication(RobustnessTestBase):
                 self.assertIn("NOT_ENOUGH_ALTERNATIVES", alts["error_codes"])
 
     def test_oversized_alternatives_list_is_refused_fast(self):
-        # Review finding (2026-07-27, extraction round 28): the pairwise
+        # the pairwise
         # duplicate check is O(n^2) -- 800 alternatives took ~5 s. An
         # analysis lists distinct options, not a dump: refuse past the bound.
         import time as _time
@@ -1603,7 +1603,7 @@ class TestAlternativePairwiseDuplication(RobustnessTestBase):
 
 class TestD6ReplaceRetry(RobustnessTestBase):
     def test_save_survives_transient_permission_error(self):
-        # D6 (lot 2): a transient Windows sharing violation (reader holding
+        # a transient Windows sharing violation (reader holding
         # the file for milliseconds) must be absorbed by the bounded retry.
         real_replace = os.replace
         calls = {"n": 0}
@@ -1662,9 +1662,9 @@ class TestD6ReplaceRetry(RobustnessTestBase):
         self.assertIn("contexts", on_disk)
 
 
-class TestKimiFindings(RobustnessTestBase):
+class TestCallerMarkers(RobustnessTestBase):
     def test_markers_survive_learn_in_memory(self):
-        # Kimi finding 1 (2026-07-27): the reset markers are the caller's
+        # the reset markers are the caller's
         # diagnostics; the post-learn in-place refresh must not discard them
         # (the disk copy alone stays filtered).
         path = store.paths.store_path()
@@ -1681,7 +1681,7 @@ class TestKimiFindings(RobustnessTestBase):
         self.assertNotIn("_reset_reason", on_disk)
 
     def test_markers_survive_handle_message_reload(self):
-        # Review finding (2026-07-27, lot 2 round 1): the per-call reload in
+        # the per-call reload in
         # handle_message wiped the markers exactly like the learn path did --
         # the same contract applies to every in-place refresh.
         path = store.paths.store_path()
@@ -1698,7 +1698,7 @@ class TestKimiFindings(RobustnessTestBase):
         self.assertIn("_backup", st)
 
     def test_fresh_markers_from_reload_win_over_old_ones(self):
-        # Review finding (2026-07-27, lot 2 round 2): if the per-call reload
+        # if the per-call reload
         # itself resets a corrupt store, ITS markers are newer than the ones
         # carried in memory -- the old ones must not overwrite them.
         st = store.load()
@@ -1714,7 +1714,7 @@ class TestKimiFindings(RobustnessTestBase):
         self.assertNotEqual(st["_reset_reason"], "OLD_MARKER")
 
     def test_learn_message_reports_axis_counters(self):
-        # Kimi finding 2: like traps, the message distinguishes an addition
+        # like traps, the message distinguishes an addition
         # from an in-place update.
         text, _ = server.call_tool(store.load(), "multidim_learn",
                                    {"context": "c", "axes": [{"name": "A", "question": "q1"}]})
@@ -1725,10 +1725,10 @@ class TestKimiFindings(RobustnessTestBase):
         self.assertIn("Axes: 1 added, 1 updated.", text)
 
     def test_case_variant_generic_is_never_keyword_matched(self):
-        # Kimi finding 3: a hand-edited 'Generic' must be treated as the
+        # a hand-edited 'Generic' must be treated as the
         # fallback family by DETECTION too, not keyword-matched while learn
         # treats it as generic (one predicate, one semantics).
-        # Review finding (2026-07-27, extraction round 51): this used to APPEND
+        # this used to APPEND
         # a second 'Generic' beside the seeded 'generic'. Two contexts sharing
         # a normalised name is corruption, so load() reset the store and the
         # assertions passed on the seed -- the regression was never exercised
@@ -1745,7 +1745,7 @@ class TestKimiFindings(RobustnessTestBase):
         self.assertNotIn("_reset_reason", loaded)  # the store must stay VALID
         self.assertIn("Generic", [c["name"] for c in loaded["contexts"]])
         # the keyword is on the fallback context, so it must NOT be matched
-        c, score = server.detect_context(loaded, "sujet zorglubxyz")
+        c, score = server.detect_context(loaded, "subject zorglubxyz")
         self.assertEqual(c.get("name"), "Generic")
         self.assertEqual(score, 0)
 
@@ -1758,14 +1758,14 @@ class TestKimiFindings(RobustnessTestBase):
 
 
 class TestPresentButUnusableTrapId(RobustnessTestBase):
-    """Review finding (2026-07-27, extraction round 57): a trap_id that was
+    """a trap_id that was
     present but not usable text was silently replaced by a derived one. The
     caller went on referencing the id it sent while the store held another, so
     its trap answer could never match. Deriving is for a MISSING key only."""
 
     def test_non_text_id_is_refused_not_rewritten(self):
         from multidim_mcp import frames
-        base = {"statement": "une lecon", "mandatory_question": "q?",
+        base = {"statement": "a lesson", "mandatory_question": "q?",
                 "triggers": ["t"]}
         for bad in (123, None, [], {}, "", "   "):
             trap, err = frames.sanitize_trap("ctx", dict(base, trap_id=bad))
@@ -1775,7 +1775,7 @@ class TestPresentButUnusableTrapId(RobustnessTestBase):
     def test_missing_id_still_derives(self):
         from multidim_mcp import frames
         trap, err = frames.sanitize_trap(
-            "ctx", {"statement": "une lecon", "mandatory_question": "q?",
+            "ctx", {"statement": "a lesson", "mandatory_question": "q?",
                     "triggers": ["t"]})
         self.assertIsNone(err)
         self.assertTrue(trap["trap_id"].startswith("trap_ctx_"))
@@ -1783,18 +1783,18 @@ class TestPresentButUnusableTrapId(RobustnessTestBase):
     def test_learn_reports_the_refusal(self):
         text, is_error = server.call_tool(
             store.load(), "multidim_learn",
-            {"context": "c", "traps": [{"trap_id": 123, "statement": "une lecon",
+            {"context": "c", "traps": [{"trap_id": 123, "statement": "a lesson",
                                         "mandatory_question": "q?",
                                         "triggers": ["t"]}]})
         self.assertIn("trap_id", text)
         # nothing was stored under a fabricated id
         ctx = store.find_context(store.load(), "c")
         self.assertEqual([t for t in (ctx or {}).get("traps", [])
-                          if t.get("statement") == "une lecon"], [])
+                          if t.get("statement") == "a lesson"], [])
 
 
 class TestDerivedIdSurvivesUnencodableText(RobustnessTestBase):
-    """Review finding (2026-07-27, extraction round 54): the derived trap_id
+    """the derived trap_id
     hashed a UTF-8 encoding of the context name. A lone surrogate is valid in a
     Python str but has no UTF-8 encoding, so learn died on UnicodeEncodeError
     instead of producing an id."""
@@ -1802,7 +1802,7 @@ class TestDerivedIdSurvivesUnencodableText(RobustnessTestBase):
     def test_lone_surrogate_context_still_derives_an_id(self):
         from multidim_mcp import frames
         trap, err = frames.sanitize_trap(
-            "\ud800", {"statement": "une lecon", "mandatory_question": "q?",
+            "\ud800", {"statement": "a lesson", "mandatory_question": "q?",
                        "triggers": ["t"]})
         self.assertIsNone(err)
         # the id must be usable everywhere it travels: store and wire
@@ -1813,7 +1813,7 @@ class TestDerivedIdSurvivesUnencodableText(RobustnessTestBase):
         from multidim_mcp import frames
         trap, err = frames.sanitize_trap(
             "аудит",  # 'audit' in Cyrillic
-            {"statement": "une lecon", "mandatory_question": "q?",
+            {"statement": "a lesson", "mandatory_question": "q?",
              "triggers": ["t"]})
         self.assertIsNone(err)
         self.assertIn("аудит", trap["trap_id"])
@@ -1832,7 +1832,7 @@ class TestDerivedIdSurvivesUnencodableText(RobustnessTestBase):
 
 
 class TestMatchingFoldsMathLikeTheDedupKey(RobustnessTestBase):
-    """Review finding (2026-07-27, extraction round 61): detection folded with
+    """detection folded with
     ``fold`` alone while the dedup key also folded math, so a trigger typed
     '!=' never fired on a subject written with the Unicode sign -- although
     the two are ONE lesson everywhere else. The lesson stayed silent exactly
@@ -1841,7 +1841,7 @@ class TestMatchingFoldsMathLikeTheDedupKey(RobustnessTestBase):
     def _ctx(self):
         return {"name": "membership", "description": "d", "keywords": ["&&"],
                 "axes": [],
-                "traps": [{"trap_id": "t1", "statement": "une lecon",
+                "traps": [{"trap_id": "t1", "statement": "a lesson",
                            "mandatory_question": "q?", "triggers": ["!="],
                            "severity": "medium", "active": True}]}
 
@@ -1878,7 +1878,7 @@ class TestMatchingFoldsMathLikeTheDedupKey(RobustnessTestBase):
 
 
 class TestDuplicateTrapIdIsCorruption(RobustnessTestBase):
-    """Review finding (2026-07-27, extraction round 50): two traps could share
+    """two traps could share
     one trap_id. Disabling that id reached only the twin the index held, and
     select_traps kept injecting the other -- a lesson the user switched off
     came back."""
@@ -1899,7 +1899,7 @@ class TestDuplicateTrapIdIsCorruption(RobustnessTestBase):
         self.assertIn("_reset_reason", reloaded)
 
     def test_one_lesson_under_two_ids_is_corruption(self):
-        # Review finding (2026-07-27, extraction round 63): unique ids were
+        # unique ids were
         # checked, the LESSON was not. Two ids carrying one idea passed the
         # load, and select_traps injected the same mandatory question twice
         # into every frame. upsert_traps cannot produce that, so it is a hand
@@ -1910,8 +1910,8 @@ class TestDuplicateTrapIdIsCorruption(RobustnessTestBase):
         path = self._write_store(lambda st: st["contexts"].append(
             {"name": "dupctx", "description": "d", "keywords": [], "axes": [],
              # same idea, different spelling and different ids
-             "traps": [trap("t1", "la meme lecon"),
-                       trap("t2", "la  MEME   lecon !")]}))
+             "traps": [trap("t1", "the same lesson"),
+                       trap("t2", "the  SAME   lesson !")]}))
         reloaded = store.load()
         self.assertTrue(path.with_name(path.name + ".bak").exists())
         self.assertIsNone(store.find_context(reloaded, "dupctx"))
@@ -1923,7 +1923,7 @@ class TestDuplicateTrapIdIsCorruption(RobustnessTestBase):
                     "triggers": ["zz"], "severity": "medium", "active": True}
         self._write_store(lambda st: st["contexts"].append(
             {"name": "okctx", "description": "d", "keywords": [], "axes": [],
-             "traps": [trap("t1", "premiere lecon"), trap("t2", "seconde lecon")]}))
+             "traps": [trap("t1", "first lesson"), trap("t2", "second lesson")]}))
         ctx = store.find_context(store.load(), "okctx")
         self.assertIsNotNone(ctx)
         self.assertEqual([t["trap_id"] for t in ctx["traps"]], ["t1", "t2"])
@@ -1937,7 +1937,7 @@ class TestDuplicateTrapIdIsCorruption(RobustnessTestBase):
 
 
 class TestBackupIsCompleteBeforeTheReset(RobustnessTestBase):
-    """Review finding (2026-07-27, extraction round 49): os.write may write
+    """os.write may write
     fewer bytes than asked. The result was ignored, so a TRUNCATED backup was
     taken for a good one and the unreadable original was then overwritten --
     losing the only complete copy, which is exactly what this branch exists to
@@ -1961,7 +1961,7 @@ class TestBackupIsCompleteBeforeTheReset(RobustnessTestBase):
         self.assertEqual(path.read_text(encoding="utf-8"), corrupt)
 
     def test_a_second_corruption_is_still_recoverable(self):
-        # Review finding (2026-07-27, extraction round 59): the backup had one
+        # the backup had one
         # fixed name, so a SECOND corruption could not create it (O_EXCL) and
         # load() raised for good -- the recovery branch made recovery
         # impossible, and the server stayed dead until someone deleted the
@@ -2004,7 +2004,7 @@ class TestBackupIsCompleteBeforeTheReset(RobustnessTestBase):
 
 
 class TestStoreFilesAreNotWorldReadable(RobustnessTestBase):
-    """Review finding (2026-07-27, extraction round 45): the corrupt-store
+    """the corrupt-store
     backup was created by os.open with no mode, so it landed at 0o777 & ~umask
     -- typically 0o755 -- while the store it copies is 0o600. The evidence dump
     was more exposed than the evidence."""
@@ -2030,7 +2030,7 @@ class TestStoreFilesAreNotWorldReadable(RobustnessTestBase):
 
 
 class TestLegacyCollapseIsLossless(RobustnessTestBase):
-    """Review finding (2026-07-27, extraction round 42): the legacy-duplicate
+    """the legacy-duplicate
     collapse kept the first twin and dropped the second, so a twin holding a
     DIFFERENT non-empty value lost it silently -- and the collapse ran even on
     a learn that carried no axes at all."""
@@ -2073,7 +2073,7 @@ class TestLegacyCollapseIsLossless(RobustnessTestBase):
         self.assertEqual(store.find_context(store.load(), "legacy")["axes"], before)
 
     def test_complementary_twin_is_still_collapsed(self):
-        # the round-3 behaviour is unchanged where absorbing loses nothing
+        # the earlier behaviour is unchanged where absorbing loses nothing
         self._legacy_store([{"name": "A", "question": "q1", "sublenses": []},
                             {"name": "A", "question": "", "sublenses": ["s1"]}])
         text, is_error = server.call_tool(store.load(), "multidim_learn",
@@ -2087,7 +2087,7 @@ class TestLegacyCollapseIsLossless(RobustnessTestBase):
 
 
 class TestDataDirIsAlwaysAbsolute(RobustnessTestBase):
-    """Review finding (2026-07-27, extraction round 41): a relative data dir
+    """a relative data dir
     followed the process's cwd. The server is spawned by a client with a cwd it
     does not choose, so two launches read two different stores."""
 
