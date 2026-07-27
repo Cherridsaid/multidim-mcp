@@ -5,6 +5,9 @@ phase-log.jsonl
 refusal-state.json
 phase-reviews/
 
+# Local analysis output (regenerated on demand, never published)
+graphify-out/
+
 # Python
 __pycache__/
 *.py[cod]
