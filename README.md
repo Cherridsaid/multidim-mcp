@@ -21,6 +21,36 @@ always produces the same frame.
   migrations, backed-up resets, and a guard that refuses to ever touch a foreign
   `~/.multidim` store.
 
+## See the difference
+
+An agent analyses *"Should we migrate the billing service from MySQL to
+PostgreSQL?"*. Every section is filled, every sentence reads fine. Here is what
+`multidim_validate` returns on that first pass:
+
+```
+overall verdict: REJECT
+
+REJECT  alternatives        NOT_ENOUGH_ALTERNATIVES, ALTERNATIVE_DUPLICATES_PRIMARY
+REJECT  hypotheses          HYPOTHESIS_NOT_FALSIFIABLE
+REJECT  second_order_risks  SECOND_ORDER_REPEATS_FIRST
+REJECT  cross_talk          GENERIC_DENSITY_HIGH
+REJECT  synthesis           SYNTHESIS_WITHOUT_REFERENCES
+WARNING premortem           PREMORTEM_SIMILAR_TO_RISKS
+```
+
+The only alternative restated the hypothesis, the hypothesis carried no test that
+could prove it wrong, the second-order effect repeated the first one word for
+word, and the conclusion referenced none of the work above. None of that is
+visible when you read the answer; all of it is reported here, by name.
+
+Redo the rejected sections and the same checker returns `ACCEPT`. Edit the frame
+to delete the rule you find inconvenient, and it refuses the whole submission —
+the frame carries a hash of its own content.
+
+Full transcript, including what the fixed sections look like and what this
+deliberately does *not* check: **[DEMO.md](DEMO.md)**. Reproduce it in one
+command: `python demo.py`.
+
 ## Quickstart
 
 ```bash
@@ -99,6 +129,7 @@ hardcoding them into public source.
 ```bash
 python run_tests.py      # full suite, stdlib only
 python smoke_install.py  # packaging smoke test (wheel + venv + entry point)
+python demo.py           # the analyse -> validate -> fix -> accept cycle of DEMO.md
 ```
 
 CI runs both on Ubuntu and Windows across Python 3.9 / 3.11 / 3.13.
