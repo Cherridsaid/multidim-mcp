@@ -1,8 +1,10 @@
 <p align="center">
-  <img src="docs/hero.png" alt="multidim-mcp: one subject, split through a prism into eight analysis lenses" width="100%">
+  <img src="https://raw.githubusercontent.com/Cherridsaid/multidim-mcp/main/docs/hero.png" alt="multidim-mcp: one subject, split through a prism into eight analysis lenses" width="100%">
 </p>
 
 # multidim-mcp
+
+<!-- mcp-name: io.github.Cherridsaid/multidim-mcp -->
 
 **Structured thinking grids for AI agents — a standalone MCP server, pure standard library.**
 
@@ -83,7 +85,7 @@ Or run it directly: `python -m multidim_mcp`.
 ## How it works
 
 <p align="center">
-  <img src="docs/workflow.png" alt="multidim_analyze produces a deterministic v2 frame; your LLM fills it; multidim_validate stamps ACCEPT / WARNING / REJECT and only rejected sections are redone" width="90%">
+  <img src="https://raw.githubusercontent.com/Cherridsaid/multidim-mcp/main/docs/workflow.png" alt="multidim_analyze produces a deterministic v2 frame; your LLM fills it; multidim_validate stamps ACCEPT / WARNING / REJECT and only rejected sections are redone" width="90%">
 </p>
 
 1. `multidim_analyze` detects the best context for your subject (word-boundary

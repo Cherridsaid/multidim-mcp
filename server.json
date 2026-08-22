@@ -1,0 +1,33 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Cherridsaid/multidim-mcp",
+  "title": "Multidim",
+  "description": "Structured thinking grids for AI agents: deterministic analysis frames, validation, learned traps",
+  "version": "0.1.0",
+  "websiteUrl": "https://github.com/Cherridsaid/multidim-mcp",
+  "repository": {
+    "url": "https://github.com/Cherridsaid/multidim-mcp",
+    "source": "github",
+    "id": "1343051007"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "multidim-mcp",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "MULTIDIM_MCP_HOME",
+          "description": "Optional. Overrides the dedicated per-user data directory where the store is created.",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

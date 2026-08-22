@@ -6,6 +6,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `server.json` describing the server for the official MCP Registry, under the
+  name `io.github.Cherridsaid/multidim-mcp` (PyPI package `multidim-mcp`,
+  stdio transport), plus the matching `mcp-name` ownership marker in the README.
+- `publish.yml` workflow: on a `v*` tag, runs the test suite and the packaging
+  smoke test, publishes the package to PyPI (trusted publishing, no stored
+  token) and then registers the release in the MCP Registry (GitHub OIDC).
+- `demo.py` and `DEMO.md`: a reproducible end-to-end run of the
+  analyse -> fill -> validate -> fix -> accept cycle against a throwaway store.
+
 ## [0.1.0] - 2026-07-28
 
 First public release: a standalone Multidim MCP server extracted from a larger
