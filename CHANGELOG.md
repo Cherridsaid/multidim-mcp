@@ -6,21 +6,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Added
-
-- `server.json` describing the server for the official MCP Registry, under the
-  name `io.github.Cherridsaid/multidim-mcp` (PyPI package `multidim-mcp`,
-  stdio transport), plus the matching `mcp-name` ownership marker in the README.
-- `publish.yml` workflow: on a `v*` tag, runs the test suite and the packaging
-  smoke test, publishes the package to PyPI (trusted publishing, no stored
-  token) and then registers the release in the MCP Registry (GitHub OIDC).
-- `demo.py` and `DEMO.md`: a reproducible end-to-end run of the
-  analyse -> fill -> validate -> fix -> accept cycle against a throwaway store.
-
-## [0.1.0] - 2026-07-28
+## [0.1.0] - 2026-08-22
 
 First public release: a standalone Multidim MCP server extracted from a larger
-private codebase, with no dependency on it.
+private codebase, with no dependency on it. Published to PyPI as `multidim-mcp`
+and listed in the official MCP Registry as `io.github.Cherridsaid/multidim-mcp`.
 
 ### Added
 
@@ -33,6 +23,13 @@ private codebase, with no dependency on it.
 - Learned traps: a lesson becomes a mandatory question in later frames.
 - Packaging with a real install check (`smoke_install.py`), and CI on Linux and
   Windows across Python 3.9, 3.11 and 3.13.
+- `demo.py` and `DEMO.md`: a reproducible end-to-end run of the
+  analyse -> fill -> validate -> fix -> accept cycle against a throwaway store.
+- `server.json` describing the server for the official MCP Registry, plus the
+  matching `mcp-name` ownership marker in the README.
+- `publish.yml` workflow: on a `v*` tag, runs the test suite and the packaging
+  smoke test, publishes the package to PyPI (trusted publishing, no stored
+  token) and then registers the release in the MCP Registry (GitHub OIDC).
 
 ### Fixed
 

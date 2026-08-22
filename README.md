@@ -56,7 +56,8 @@ command: `python demo.py`.
 ## Quickstart
 
 ```bash
-pip install .
+pip install multidim-mcp        # from PyPI
+pip install .                   # or from a source checkout
 ```
 
 Register the server with any MCP client (stdio transport):
@@ -71,7 +72,10 @@ Register the server with any MCP client (stdio transport):
 }
 ```
 
-Or run it directly: `python -m multidim_mcp`.
+Or run it directly: `python -m multidim_mcp`, or without installing: `uvx multidim-mcp`.
+
+The server is listed in the official MCP Registry as
+[`io.github.Cherridsaid/multidim-mcp`](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.Cherridsaid/multidim-mcp).
 
 ## Tools
 
