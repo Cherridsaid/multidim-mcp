@@ -6,6 +6,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Context detection missed the ordinary phrasings of its own domains. Keywords
+  match whole tokens, so `option` never matched `options`, `risk` never matched
+  `risks` and `compare` never matched `comparing`: five decision subjects out of
+  six fell through to the `generic` grid, and `code_review` missed `tests` and
+  `refactoring`. Every realistic inflection is now a keyword of its own. The
+  whole-token rule itself is unchanged — `postal` still never matches `post`.
+
+### Added
+
+- Additive seed-keyword migration: a keyword added to a shipped context now
+  reaches stores created by an earlier release, guarded by a
+  `seed_keywords_version` marker. The union never removes, renames or reorders
+  anything, never touches a user-made context, and does not resurrect a keyword
+  the user deleted afterwards. `BASE_VERSION` is deliberately left alone —
+  bumping it would back up and reset the store, discarding learned traps.
+
 ## [0.1.0] - 2026-08-22
 
 First public release: a standalone Multidim MCP server extracted from a larger

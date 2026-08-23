@@ -868,6 +868,25 @@ class TestPunctuatedKeywords(RobustnessTestBase):
         self.assertEqual(score, 0)
         self.assertEqual(c["name"], "generic")
 
+    def test_seed_contexts_catch_their_ordinary_phrasings(self):
+        # the whole-token rule means every inflection has to be a keyword of
+        # its own: 'option' never matches 'options'. These subjects all fell
+        # through to the generic grid until the seed keywords listed them.
+        cases = (
+            ("decision", "Should we migrate the billing service to PostgreSQL?"),
+            ("decision", "What are our options for the database?"),
+            ("decision", "We need to weigh the risks of this migration"),
+            ("decision", "Comparing three alternatives for the payment provider"),
+            ("decision", "Whether to rewrite or patch"),
+            ("code_review", "This refactoring breaks two tests"),
+            ("code_review", "Review these code changes for regressions"),
+        )
+        for expected, subject in cases:
+            with self.subTest(subject=subject):
+                c, score = server.detect_context(store.load(), subject)
+                self.assertEqual(c["name"], expected, subject)
+                self.assertGreater(score, 0)
+
 
 class TestContextLookupNormalisation(RobustnessTestBase):
     def test_stored_name_with_trailing_space_is_found(self):

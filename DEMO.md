@@ -19,8 +19,8 @@ analysis. It carries the required sections, the schema of each one, the
 validation rules that will be applied, and a `frame_hash` over its own content.
 
 ```
-context      : generic (score 0)
-frame_hash   : 4e889f8bbfae895fe9512aeed37d411360402f924920aae4b34b2ee262062a7e
+context      : decision (score 1)
+frame_hash   : ada397a07ac59c8260494443cce20fecbf9e0aac094e27f631ac99a5448d023e
 sections     : facts, hypotheses, alternatives, hidden_dependencies,
                second_order_risks, contradictions, open_questions,
                decision_criteria, cross_talk, premortem, synthesis
@@ -124,6 +124,8 @@ Being clear about the boundary matters more than the demo:
   and auditable — every time, not on a good day.
 - **The filler blacklist ships with eight phrases.** It is a floor, not a style
   checker; extend it through your store for the phrasing your own agents lean on.
-- **`generic` is the fallback grid.** The subject above matched no context
-  keyword, so it fell back to the general-purpose lens — visible in the frame as
-  `score 0`, never silently.
+- **Context detection is keyword matching, not understanding.** A keyword
+  matches a whole token, so `option` never matches `options` — every inflection
+  is listed explicitly in the seed contexts. A subject that matches nothing
+  falls back to the `generic` grid, and the frame says so with `score 0` rather
+  than pretending to have recognised the domain.

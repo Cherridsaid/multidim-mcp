@@ -311,5 +311,75 @@ class TestNeutrality(unittest.TestCase):
             self.assertNotIn(tok, blob)
 
 
+class TestSeedKeywordMigration(StoreTestBase):
+    """A keyword added to a seed context must reach a store built earlier,
+    without resetting it and without resurrecting a deletion."""
+
+    def _legacy_store(self):
+        """A store as an older release wrote it: pre-union keywords on
+        'decision', a learned trap, a user context, and no version marker."""
+        st = store.load()
+        decision = store.find_context(st, "decision")
+        decision["keywords"] = ["decision", "choice", "option", "should i"]
+        decision["traps"] = [{"trap_id": "paid", "statement": "a paid lesson",
+                              "mandatory_question": "what did it cost?",
+                              "triggers": ["cost"], "active": True}]
+        st["contexts"].append({"name": "mine", "description": "user made",
+                               "keywords": ["mine"], "axes": [], "traps": []})
+        st.pop("seed_keywords_version", None)
+        store.save(st)
+        return st
+
+    def test_union_enriches_without_losing_anything(self):
+        self._legacy_store()
+        migrated = store.load()
+        decision = store.find_context(migrated, "decision")
+        self.assertIn("should we", decision["keywords"])
+        self.assertIn("options", decision["keywords"])
+        # nothing the user owns is touched
+        self.assertEqual([t["trap_id"] for t in decision["traps"]], ["paid"])
+        self.assertEqual(store.find_context(migrated, "mine")["keywords"], ["mine"])
+        # the store is marked so the union does not run again
+        self.assertEqual(migrated["seed_keywords_version"],
+                         base_contexts.SEED_KEYWORDS_VERSION)
+
+    def test_deleted_keyword_stays_deleted(self):
+        self._legacy_store()
+        migrated = store.load()
+        decision = store.find_context(migrated, "decision")
+        decision["keywords"].remove("should we")
+        store.save(migrated)
+
+        reloaded = store.load()
+        self.assertNotIn("should we",
+                         store.find_context(reloaded, "decision")["keywords"])
+
+    def test_no_duplicate_keywords_after_union(self):
+        self._legacy_store()
+        keywords = store.find_context(store.load(), "decision")["keywords"]
+        folded = [k.strip().casefold() for k in keywords]
+        self.assertEqual(len(folded), len(set(folded)))
+
+    def test_deleted_seed_context_is_not_recreated(self):
+        st = self._legacy_store()
+        st["contexts"] = [c for c in st["contexts"]
+                          if c.get("name") != "code_review"]
+        st.pop("seed_keywords_version", None)
+        store.save(st)
+
+        self.assertIsNone(store.find_context(store.load(), "code_review"))
+
+    def test_garbage_marker_is_survivable(self):
+        st = self._legacy_store()
+        st["seed_keywords_version"] = "not a number"
+        store.save(st)
+
+        migrated = store.load()
+        self.assertIn("should we",
+                      store.find_context(migrated, "decision")["keywords"])
+        self.assertEqual(migrated["seed_keywords_version"],
+                         base_contexts.SEED_KEYWORDS_VERSION)
+
+
 if __name__ == "__main__":
     unittest.main()
