@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "multidim-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "Structured thinking grids for AI agents - a standalone MCP server, pure standard library"
 readme = "README.md"
 requires-python = ">=3.9"
